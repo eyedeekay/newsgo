@@ -19,10 +19,13 @@ func (n *NewsStats) Graph(rw http.ResponseWriter) {
 		{Value: float64(0), Label: "baseline"},
 	}
 	log.Println("Graphing")
+	total := 0
 	for k, v := range n.DownloadLangs {
 		log.Printf("Label: %s Value: %d", k, v)
+		total += v
 		bars = append(bars, chart.Value{Value: float64(v), Label: k})
 	}
+	bars = append(bars, chart.Value{Value: float64(total), Label: "Total Requests"})
 
 	graph := chart.BarChart{
 		Title: "Downloads by language",
