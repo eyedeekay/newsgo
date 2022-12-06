@@ -25,7 +25,7 @@ func (n *NewsStats) Graph(rw http.ResponseWriter) {
 		total += v
 		bars = append(bars, chart.Value{Value: float64(v), Label: k})
 	}
-	bars = append(bars, chart.Value{Value: float64(total), Label: "Total Requests"})
+	bars = append(bars, chart.Value{Value: float64(total), Label: "Total Requests / Approx. Updates Handled"})
 
 	graph := chart.BarChart{
 		Title: "Downloads by language",
