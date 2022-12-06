@@ -21,7 +21,7 @@ var (
 	statsfile = flag.String("statsfile", "build/stats.json", "file to store stats in")
 	host      = flag.String("host", "127.0.0.1", "host to serve on")
 	port      = flag.String("port", "9696", "port to serve on")
-	i2p       = flag.Bool("i2p", true, "automatically co-host on an I2P service using SAMv3")
+	i2p       = flag.Bool("i2p", false, "automatically co-host on an I2P service using SAMv3")
 )
 
 func validatePort(s *string) {
