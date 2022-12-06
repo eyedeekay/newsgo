@@ -7,8 +7,11 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"time"
 
+	"github.com/eyedeekay/onramp"
 	server "i2pgit.org/idk/newsgo/server"
 )
 
@@ -18,6 +21,7 @@ var (
 	statsfile = flag.String("statsfile", "build/stats.json", "file to store stats in")
 	host      = flag.String("host", "127.0.0.1", "host to serve on")
 	port      = flag.String("port", "9696", "port to serve on")
+	i2p       = flag.Bool("i2p", true, "automatically co-host on an I2P service using SAMv3")
 )
 
 func validatePort(s *string) {
@@ -84,6 +88,20 @@ func Serve(host, port string) error {
 	if err != nil {
 		return err
 	}
+	defer ln.Close()
+	s := server.Serve(*dir, *statsfile)
+	defer s.Stats.Save()
+	return http.Serve(ln, s)
+}
+
+func ServeI2P() error {
+	garlic := &onramp.Garlic{}
+	defer garlic.Close()
+	ln, err := garlic.Listen()
+	if err != nil {
+		return err
+	}
+	defer ln.Close()
 	s := server.Serve(*dir, *statsfile)
 	defer s.Stats.Save()
 	return http.Serve(ln, s)
@@ -95,8 +113,31 @@ func main() {
 	validatePort(port)
 	switch command {
 	case "serve":
-		if err := Serve(*host, *port); err != nil {
-			panic(err)
+		go func() {
+			if err := Serve(*host, *port); err != nil {
+				panic(err)
+			}
+		}()
+		if *i2p {
+			go func() {
+				if err := ServeI2P(); err != nil {
+					panic(err)
+				}
+			}()
+		}
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		go func() {
+			for sig := range c {
+				log.Println("captured: ", sig)
+				os.Exit(0)
+			}
+		}()
+		i := 0
+		for {
+			time.Sleep(time.Minute)
+			log.Printf("Running for %s minutes.", i)
+			i++
 		}
 	case "build":
 	case "sign":
