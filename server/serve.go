@@ -29,13 +29,16 @@ func (n *NewsServer) ServeHTTP(rw http.ResponseWriter, rq *http.Request) {
 		rw.WriteHeader(404)
 		return
 	}
-	if err := ServeFile(file, rw); err != nil {
+	if err := n.ServeFile(file, rq, rw); err != nil {
 		log.Println("ServeHTTP:", err.Error())
 		rw.WriteHeader(404)
 	}
 }
 
 func fileCheck(file string) error {
+	if filepath.Ext(file) == ".svg" {
+		return nil
+	}
 	if _, err := os.Stat(file); err != nil {
 		return fmt.Errorf("fileCheck: %s", err)
 	}
@@ -76,6 +79,8 @@ func openDirectory(wd string) string {
 	readme += fmt.Sprintf("%s\n", filepath.Base(wd))
 	readme += fmt.Sprintf("%s\n", head(len(filepath.Base(wd))))
 	readme += fmt.Sprintf("%s\n", "")
+	readme += fmt.Sprintf("%s\n", "![language stats](langstats.svg)")
+	readme += fmt.Sprintf("%s\n", "")
 	readme += fmt.Sprintf("%s\n", "**Directory Listing:**")
 	readme += fmt.Sprintf("%s\n", "")
 	for _, file := range files {
@@ -109,18 +114,20 @@ func head(num int) string {
 	return r
 }
 
-func ServeFile(file string, rw http.ResponseWriter) error {
-	//if err := fileCheck(file); err != nil {
-	//	return fmt.Errorf("ServeFile: %s", err)
-	//}
+func (n *NewsServer) ServeFile(file string, rq *http.Request, rw http.ResponseWriter) error {
 	ftype, err := fileType(file)
 	if err != nil {
 		return fmt.Errorf("ServeFile: %s", err)
 	}
 	if ftype == "application/x-i2p-su3-news" {
 		// Log stats here
+		n.Stats.Increment(rq)
 	}
 	rw.Header().Add("Content-Type", ftype)
+	if ftype == "image/svg+xml" {
+		n.Stats.Graph(rw)
+		return nil
+	}
 	f, _ := os.Stat(file)
 	if f.IsDir() {
 		bytes := hTML(openDirectory(file))

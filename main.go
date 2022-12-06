@@ -83,18 +83,15 @@ func Help() {
 	fmt.Println("Not implemented yet")
 }
 
-func Serve(host, port string) error {
+func Serve(host, port string, s *server.NewsServer) error {
 	ln, err := net.Listen("tcp", net.JoinHostPort(host, port))
 	if err != nil {
 		return err
 	}
-	defer ln.Close()
-	s := server.Serve(*dir, *statsfile)
-	defer s.Stats.Save()
 	return http.Serve(ln, s)
 }
 
-func ServeI2P() error {
+func ServeI2P(s *server.NewsServer) error {
 	garlic := &onramp.Garlic{}
 	defer garlic.Close()
 	ln, err := garlic.Listen()
@@ -102,8 +99,6 @@ func ServeI2P() error {
 		return err
 	}
 	defer ln.Close()
-	s := server.Serve(*dir, *statsfile)
-	defer s.Stats.Save()
 	return http.Serve(ln, s)
 }
 
@@ -113,14 +108,15 @@ func main() {
 	validatePort(port)
 	switch command {
 	case "serve":
+		s := server.Serve(*dir, *statsfile)
 		go func() {
-			if err := Serve(*host, *port); err != nil {
+			if err := Serve(*host, *port, s); err != nil {
 				panic(err)
 			}
 		}()
 		if *i2p {
 			go func() {
-				if err := ServeI2P(); err != nil {
+				if err := ServeI2P(s); err != nil {
 					panic(err)
 				}
 			}()
@@ -130,13 +126,14 @@ func main() {
 		go func() {
 			for sig := range c {
 				log.Println("captured: ", sig)
+				s.Stats.Save()
 				os.Exit(0)
 			}
 		}()
 		i := 0
 		for {
 			time.Sleep(time.Minute)
-			log.Printf("Running for %s minutes.", i)
+			log.Printf("Running for %d minutes.", i)
 			i++
 		}
 	case "build":

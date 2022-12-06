@@ -3,7 +3,10 @@ package newsstats
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
+
+	"github.com/wcharczuk/go-chart/v2"
 )
 
 type NewsStats struct {
@@ -11,7 +14,36 @@ type NewsStats struct {
 	StateFile     string
 }
 
-func (n *NewsStats) Increment(rq http.Request) {
+func (n *NewsStats) Graph(rw http.ResponseWriter) {
+	bars := []chart.Value{
+		{Value: float64(0), Label: "baseline"},
+	}
+	log.Println("Graphing")
+	for k, v := range n.DownloadLangs {
+		log.Printf("Label: %s Value: %d", k, v)
+		bars = append(bars, chart.Value{Value: float64(v), Label: k})
+	}
+
+	graph := chart.BarChart{
+		Title: "Downloads by language",
+		Background: chart.Style{
+			Padding: chart.Box{
+				Top:   40,
+				Left:  10,
+				Right: 10,
+			},
+		},
+		Height:   256,
+		BarWidth: 20,
+		Bars:     bars,
+	}
+	err := graph.Render(chart.SVG, rw)
+	if err != nil {
+		log.Println("Graph: error", err)
+	}
+}
+
+func (n *NewsStats) Increment(rq *http.Request) {
 	q := rq.URL.Query()
 	lang := q.Get("lang")
 	if lang != "" {
