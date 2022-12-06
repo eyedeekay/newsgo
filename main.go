@@ -60,9 +60,23 @@ func Help() {
 	fmt.Println("")
 	fmt.Println("### Options")
 	fmt.Println("")
+	fmt.Println("Use these options to configure the software")
+	fmt.Println("")
+	fmt.Println("#### Server Options(use with `serve`")
+	fmt.Println("")
 	fmt.Println(" - `-newsdir`: directory to serve newsfeed from")
 	fmt.Println(" - `-statsfile`: file to store the stats in, in json format")
+	fmt.Println(" - `-host`: host to serve news files on")
+	fmt.Println(" - `-port`: port to serve news files on")
+	fmt.Println(" - `-i2p`: serve news files directly to I2P using SAMv3")
 	fmt.Println("")
+	fmt.Println("#### Builder Options(use with `build`")
+	fmt.Println("")
+	fmt.Println("Not implemented yet")
+	fmt.Println("")
+	fmt.Println("#### Signer Options(use with `sign`")
+	fmt.Println("")
+	fmt.Println("Not implemented yet")
 }
 
 func Serve(host, port string) error {
