@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	stats "i2pgit.org/idk/newsgo/server/stats"
 )
 
 type NewsServer struct {
 	NewsDir string
+	stats.Stats   NewsStats
 }
 
 var serveTest http.Handler = &NewsServer{}
@@ -62,6 +64,9 @@ func ServeFile(file string, rw http.ResponseWriter) error {
 	ftype, err := fileType(file)
 	if err != nil {
 		return fmt.Errorf("ServeFile: %s", err)
+	}
+	if ftype == "application/x-i2p-su3-news" {
+
 	}
 	bytes, err := ioutil.ReadFile(file)
 	if err != nil {
