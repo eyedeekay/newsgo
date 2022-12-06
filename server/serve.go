@@ -144,5 +144,6 @@ func Serve(newsDir, newsStats string) *NewsServer {
 			StateFile: newsStats,
 		},
 	}
+	s.Stats.Load()
 	return s
 }
