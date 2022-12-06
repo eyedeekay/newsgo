@@ -85,6 +85,7 @@ func Serve(host, port string) error {
 		return err
 	}
 	s := server.Serve(*dir, *statsfile)
+	defer s.Stats.Save()
 	return http.Serve(ln, s)
 }
 
