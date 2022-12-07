@@ -1,4 +1,6 @@
-newsgo
-onionkeys
-i2pkeys
-build
+/newsgo
+/onionkeys
+/i2pkeys
+/tlskeys
+/build
+/data
