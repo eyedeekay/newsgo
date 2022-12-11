@@ -283,7 +283,7 @@ func main() {
 					}
 					ext := filepath.Ext(path)
 					if ext == ".html" {
-						Build(path)
+						Sign(path)
 					}
 					return nil
 				})
@@ -291,7 +291,7 @@ func main() {
 				log.Println(err)
 			}
 		} else {
-			Build(*newsfile)
+			Sign(*newsfile)
 		}
 	case "help":
 		Help()
