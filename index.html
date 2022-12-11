@@ -1,0 +1,219 @@
+<html>
+  <head>
+    <title>
+      newsgo
+    </title>
+    <meta name="author" content="eyedeekay" />
+    <meta name="description" content="newsgo" />
+    <meta name="keywords" content="main" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="showhider.css" />
+  </head>
+  <body>
+    <div id="navbar">
+      <a href="#shownav">
+        Show navigation
+      </a>
+      <div id="shownav">
+        <div id="hidenav">
+          <ul>
+            <li>
+              <a href="..">
+                Up one level ^
+              </a>
+            </li>
+            <li>
+              <a href="index.html">
+                index
+              </a>
+            </li>
+          </ul>
+          <br>
+          <a href="#hidenav">
+            Hide Navigation
+          </a>
+        </div>
+      </div>
+    </div>
+    <a id="returnhome" href="/">
+      /
+    </a>
+    <h1>
+      newsgo
+    </h1>
+    <p>
+      I2P News Server Tool/Library
+    </p>
+    <h2>
+      Usage
+    </h2>
+    <p>
+      ./newsgo -command $command -newsdir $news_directory -statsfile $news_stats_file
+    </p>
+    <h3>
+      Commands
+    </h3>
+    <ul>
+      <li>
+        serve: Serve newsfeeds from a directory
+      </li>
+      <li>
+        build: Build newsfeeds from XML(Not Implemented Yet)
+      </li>
+      <li>
+        sign: Sign newsfeeds with local keys(Not Implemented Yet)
+      </li>
+    </ul>
+    <h3>
+      Options
+    </h3>
+    <p>
+      Use these options to configure the software
+    </p>
+    <h4>
+      Server Options(use with
+      <code>
+        serve
+      </code>
+      )
+    </h4>
+    <ul>
+      <li>
+        <code>
+          -newsdir
+        </code>
+        : directory to serve newsfeed from
+      </li>
+      <li>
+        <code>
+          -statsfile
+        </code>
+        : file to store the stats in, in json format
+      </li>
+      <li>
+        <code>
+          -host
+        </code>
+        : host to serve news files on
+      </li>
+      <li>
+        <code>
+          -port
+        </code>
+        : port to serve news files on
+      </li>
+      <li>
+        <code>
+          -http
+        </code>
+        : serve news on host:port using HTTP
+      </li>
+      <li>
+        <code>
+          -i2p
+        </code>
+        : serve news files directly to I2P using SAMv3
+      </li>
+    </ul>
+    <h4>
+      Builder Options(use with
+      <code>
+        build
+      </code>
+      )
+    </h4>
+    <ul>
+      <li>
+        <code>
+          -newsfile
+        </code>
+        : entries to pass to news generator. If passed a directory, all
+        <code>
+          entries.html
+        </code>
+        files in the directory will be processed
+      </li>
+      <li>
+        <code>
+          -blockfile
+        </code>
+        : block list file to pass to news generator
+      </li>
+      <li>
+        <code>
+          -releasejson
+        </code>
+        : json file describing an update to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feedtitle
+        </code>
+        : title to use for the RSS feed to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feedsubtitle
+        </code>
+        : subtitle to use for the RSS feed to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feedsite
+        </code>
+        : site for the RSS feed to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feedmain
+        </code>
+        : Primary newsfeed for updates to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feedbackup
+        </code>
+        : Backup newsfeed for updates to pass to news generator
+      </li>
+      <li>
+        <code>
+          -feeduri
+        </code>
+        : UUID to use for the RSS feed to pass to news generator
+      </li>
+    </ul>
+    <h4>
+      Signer Options(use with
+      <code>
+        sign
+      </code>
+      )
+    </h4>
+    <p>
+      Not implemented yet
+    </p>
+    <div id="sourcecode">
+      <span id="sourcehead">
+        <strong>
+          Get the source code:
+        </strong>
+      </span>
+      <ul>
+        <li>
+          <a href="https://github.com/eyedeekay/newsgo.git">
+            Source Repository: (https://github.com/eyedeekay/newsgo.git)
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <iframe src="https://snowflake.torproject.org/embed.html" width="320" height="240" frameborder="0" scrolling="no"></iframe>
+    </div>
+    <div>
+      <a href="https://geti2p.net/">
+        <img src="i2plogo.png"></img>
+        I2P
+      </a>
+    </div>
+  </body>
+</html>
