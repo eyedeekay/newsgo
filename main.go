@@ -159,6 +159,10 @@ func Build(newsFile string) {
 	news.BACKUPFEED = *backupurl
 	news.SUBTITLE = *subtitle
 	news.URNID = *urn
+	base := filepath.Join(*newsfile, "entries.html")
+	if newsFile != base {
+		news.Feed.BaseEntriesHTMLPath = base
+	}
 	if feed, err := news.Build(); err != nil {
 		log.Printf("Build error: %s", err)
 	} else {

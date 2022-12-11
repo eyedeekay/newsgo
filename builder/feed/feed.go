@@ -8,10 +8,11 @@ import (
 )
 
 type Feed struct {
-	HeaderTitle     string
-	ArticlesSet     []string
-	EntriesHTMLPath string
-	doc             soup.Root
+	HeaderTitle         string
+	ArticlesSet         []string
+	EntriesHTMLPath     string
+	BaseEntriesHTMLPath string
+	doc                 soup.Root
 }
 
 func (f *Feed) LoadHTML() error {
@@ -24,6 +25,18 @@ func (f *Feed) LoadHTML() error {
 	articles := f.doc.FindAll("article")
 	for _, article := range articles {
 		f.ArticlesSet = append(f.ArticlesSet, article.HTML())
+	}
+	if f.BaseEntriesHTMLPath != "" {
+		data, err := ioutil.ReadFile(f.BaseEntriesHTMLPath)
+		if err != nil {
+			return fmt.Errorf("LoadHTML: error", err)
+		}
+		f.doc = soup.HTMLParse(string(data))
+		f.HeaderTitle = f.doc.Find("header").FullText()
+		articles := f.doc.FindAll("article")
+		for _, article := range articles {
+			f.ArticlesSet = append(f.ArticlesSet, article.HTML())
+		}
 	}
 	return nil
 }
