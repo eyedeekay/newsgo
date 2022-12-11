@@ -9,6 +9,7 @@ require (
 	github.com/wcharczuk/go-chart/v2 v2.1.0
 	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
+	i2pgit.org/idk/reseed-tools v0.0.9
 )
 
 require (

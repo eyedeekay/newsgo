@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -18,7 +21,35 @@ import (
 	"github.com/google/uuid"
 	builder "i2pgit.org/idk/newsgo/builder"
 	server "i2pgit.org/idk/newsgo/server"
+	signer "i2pgit.org/idk/newsgo/signer"
 )
+
+func loadPrivateKey(path string) (*rsa.PrivateKey, error) {
+	privPem, err := ioutil.ReadFile(path)
+	if nil != err {
+		return nil, err
+	}
+
+	privDer, _ := pem.Decode(privPem)
+	privKey, err := x509.ParsePKCS1PrivateKey(privDer.Bytes)
+	if nil != err {
+		return nil, err
+	}
+
+	return privKey, nil
+}
+
+func Sign(xmlfeed string) error {
+	sk, err := loadPrivateKey(*signingkey)
+	if err != nil {
+		return err
+	}
+	signer := signer.NewsSigner{
+		SignerID:   *signerid,
+		SigningKey: sk,
+	}
+	return signer.CreateSu3(xmlfeed)
+}
 
 var (
 	serve     = flag.String("command", "help", "command to run(may be `serve`,`build`,`sign`, or `help`(default)")
@@ -39,6 +70,8 @@ var (
 	backupurl   = flag.String("feedbackup", "http://dn3tvalnjz432qkqsvpfdqrwpqkw3ye4n4i2uyfr4jexvo3sp5ka.b32.i2p/news/news.atom.xml", "Backup newsfeed for updates to pass to news generator")
 	urn         = flag.String("feeduid", uuid.New().String(), "UUID to use for the RSS feed to pass to news generator")
 	builddir    = flag.String("builddir", "build", "Build directory to output feeds to.")
+	signerid    = flag.String("signerid", "null@example.i2p", "ID to use when signing the news")
+	signingkey  = flag.String("signingkey", "signing_key.pem", "Path to a signing key")
 )
 
 func validatePort(s *string) {
@@ -103,10 +136,12 @@ func Help() {
 	fmt.Println(" - `-feedmain`: Primary newsfeed for updates to pass to news generator")
 	fmt.Println(" - `-feedbackup`: Backup newsfeed for updates to pass to news generator")
 	fmt.Println(" - `-feeduri`: UUID to use for the RSS feed to pass to news generator")
+	fmt.Println(" - `-builddir`: directory to output XML files in")
 	fmt.Println("")
 	fmt.Println("#### Signer Options(use with `sign`)")
 	fmt.Println("")
-	fmt.Println("Not implemented yet")
+	fmt.Println(" - `-signerid`: ID of the news signer")
+	fmt.Println(" - `-signingkey`: path to the signing key")
 }
 
 func Serve(host, port string, s *server.NewsServer) error {
@@ -236,6 +271,28 @@ func main() {
 			Build(*newsfile)
 		}
 	case "sign":
+		f, e := os.Stat(*newsfile)
+		if e != nil {
+			panic(e)
+		}
+		if f.IsDir() {
+			err := filepath.Walk(*newsfile,
+				func(path string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+					ext := filepath.Ext(path)
+					if ext == ".html" {
+						Build(path)
+					}
+					return nil
+				})
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			Build(*newsfile)
+		}
 	case "help":
 		Help()
 	default:

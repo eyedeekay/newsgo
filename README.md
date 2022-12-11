@@ -38,7 +38,9 @@ Use these options to configure the software
  - `-feedmain`: Primary newsfeed for updates to pass to news generator
  - `-feedbackup`: Backup newsfeed for updates to pass to news generator
  - `-feeduri`: UUID to use for the RSS feed to pass to news generator
+ - `-builddir`: directory to output XML files in
 
 #### Signer Options(use with `sign`)
 
-Not implemented yet
+ - `-signerid`: ID of the news signer
+ - `-signingkey`: path to the signing key
