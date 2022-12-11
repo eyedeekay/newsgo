@@ -1,7 +1,7 @@
 newsgo
 ======
 
-I2P News Server Tool/Library
+I2P News Server Tool/Library. A whole lot faster than the python one. Otherwise compatible.
 
 Usage
 -----
@@ -11,8 +11,8 @@ Usage
 ### Commands
 
  - serve: Serve newsfeeds from a directory
- - build: Build newsfeeds from XML(Not Implemented Yet)
- - sign: Sign newsfeeds with local keys(Not Implemented Yet)
+ - build: Build newsfeeds from XML
+ - sign: Sign newsfeeds with local keys
 
 ### Options
 
