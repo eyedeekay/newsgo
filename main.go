@@ -161,7 +161,7 @@ func Build(newsFile string) {
 	if feed, err := news.Build(); err != nil {
 		log.Printf("Build error: %s", err)
 	} else {
-		filename := strings.Replace(strings.Replace(strings.Replace(newsFile, ".html", ".atom.xml", -1), "entries", "news", -1), "translations", "", -1)
+		filename := strings.Replace(strings.Replace(strings.Replace(strings.Replace(newsFile, ".html", ".atom.xml", -1), "entries.", "news_", -1), "translations", "", -1), "news_atom", "news.atom", -1)
 		if err := os.MkdirAll(filepath.Join(*builddir, filepath.Dir(filename)), 0755); err != nil {
 			panic(err)
 		}
