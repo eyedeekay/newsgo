@@ -89,6 +89,7 @@ func Help() {
 	fmt.Println(" - `-statsfile`: file to store the stats in, in json format")
 	fmt.Println(" - `-host`: host to serve news files on")
 	fmt.Println(" - `-port`: port to serve news files on")
+	fmt.Println(" - `-http`: serve news on host:port using HTTP")
 	fmt.Println(" - `-i2p`: serve news files directly to I2P using SAMv3")
 	fmt.Println("")
 	fmt.Println("#### Builder Options(use with `build`)")

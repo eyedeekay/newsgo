@@ -24,6 +24,7 @@ Use these options to configure the software
  - `-statsfile`: file to store the stats in, in json format
  - `-host`: host to serve news files on
  - `-port`: port to serve news files on
+ - `-http`: serve news on host:port using HTTP
  - `-i2p`: serve news files directly to I2P using SAMv3
 
 #### Builder Options(use with `build`)
