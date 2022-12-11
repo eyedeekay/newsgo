@@ -27,6 +27,11 @@
                 index
               </a>
             </li>
+            <li>
+              <a href="index.html">
+                index.html
+              </a>
+            </li>
           </ul>
           <br>
           <a href="#hidenav">
@@ -181,6 +186,12 @@
         </code>
         : UUID to use for the RSS feed to pass to news generator
       </li>
+      <li>
+        <code>
+          -builddir
+        </code>
+        : directory to output XML files in
+      </li>
     </ul>
     <h4>
       Signer Options(use with
@@ -189,9 +200,20 @@
       </code>
       )
     </h4>
-    <p>
-      Not implemented yet
-    </p>
+    <ul>
+      <li>
+        <code>
+          -signerid
+        </code>
+        : ID of the news signer
+      </li>
+      <li>
+        <code>
+          -signingkey
+        </code>
+        : path to the signing key
+      </li>
+    </ul>
     <div id="sourcecode">
       <span id="sourcehead">
         <strong>
