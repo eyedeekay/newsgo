@@ -3,26 +3,42 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/eyedeekay/onramp"
+	"github.com/google/uuid"
+	builder "i2pgit.org/idk/newsgo/builder"
 	server "i2pgit.org/idk/newsgo/server"
 )
 
 var (
-	serve     = flag.String("command", "help", "command to run(may be `serve`,`build`,`sign`")
+	serve     = flag.String("command", "help", "command to run(may be `serve`,`build`,`sign`, or `help`(default)")
 	dir       = flag.String("newsdir", "build", "directory to serve news from")
 	statsfile = flag.String("statsfile", "build/stats.json", "file to store stats in")
 	host      = flag.String("host", "127.0.0.1", "host to serve on")
 	port      = flag.String("port", "9696", "port to serve on")
-	i2p       = flag.Bool("i2p", true, "automatically co-host on an I2P service using SAMv3")
+	i2p       = flag.Bool("i2p", isSamAround(), "automatically co-host on an I2P service using SAMv3")
 	tcp       = flag.Bool("http", true, "host on an HTTP service at host:port")
+	//newsfile    = flag.String("newsfile", "data/entries.html", "entries to pass to news generator. If passed a directory, all `entries.html` files in the directory will be processed")
+	newsfile    = flag.String("newsfile", "data", "entries to pass to news generator. If passed a directory, all `entries.html` files in the directory will be processed")
+	bloclist    = flag.String("blocklist", "data/blocklist.xml", "block list file to pass to news generator")
+	releasejson = flag.String("releasejson", "data/releases.json", "json file describing an update to pass to news generator")
+	title       = flag.String("feedtitle", "I2P News", "title to use for the RSS feed to pass to news generator")
+	subtitle    = flag.String("feedsubtitle", "News feed, and router updates", "subtitle to use for the RSS feed to pass to news generator")
+	site        = flag.String("feedsite", "http://i2p-projekt.i2p", "site for the RSS feed to pass to news generator")
+	mainurl     = flag.String("feedmain", DefaultFeedURL(), "Primary newsfeed for updates to pass to news generator")
+	backupurl   = flag.String("feedbackup", "http://dn3tvalnjz432qkqsvpfdqrwpqkw3ye4n4i2uyfr4jexvo3sp5ka.b32.i2p/news/news.atom.xml", "Backup newsfeed for updates to pass to news generator")
+	urn         = flag.String("feeduid", uuid.New().String(), "UUID to use for the RSS feed to pass to news generator")
+	builddir    = flag.String("builddir", "build", "Build directory to output feeds to.")
 )
 
 func validatePort(s *string) {
@@ -67,7 +83,7 @@ func Help() {
 	fmt.Println("")
 	fmt.Println("Use these options to configure the software")
 	fmt.Println("")
-	fmt.Println("#### Server Options(use with `serve`")
+	fmt.Println("#### Server Options(use with `serve`)")
 	fmt.Println("")
 	fmt.Println(" - `-newsdir`: directory to serve newsfeed from")
 	fmt.Println(" - `-statsfile`: file to store the stats in, in json format")
@@ -75,11 +91,19 @@ func Help() {
 	fmt.Println(" - `-port`: port to serve news files on")
 	fmt.Println(" - `-i2p`: serve news files directly to I2P using SAMv3")
 	fmt.Println("")
-	fmt.Println("#### Builder Options(use with `build`")
+	fmt.Println("#### Builder Options(use with `build`)")
 	fmt.Println("")
-	fmt.Println("Not implemented yet")
+	fmt.Println(" - `-newsfile`: entries to pass to news generator. If passed a directory, all `entries.html` files in the directory will be processed")
+	fmt.Println(" - `-blockfile`: block list file to pass to news generator")
+	fmt.Println(" - `-releasejson`: json file describing an update to pass to news generator")
+	fmt.Println(" - `-feedtitle`: title to use for the RSS feed to pass to news generator")
+	fmt.Println(" - `-feedsubtitle`: subtitle to use for the RSS feed to pass to news generator")
+	fmt.Println(" - `-feedsite`: site for the RSS feed to pass to news generator")
+	fmt.Println(" - `-feedmain`: Primary newsfeed for updates to pass to news generator")
+	fmt.Println(" - `-feedbackup`: Backup newsfeed for updates to pass to news generator")
+	fmt.Println(" - `-feeduri`: UUID to use for the RSS feed to pass to news generator")
 	fmt.Println("")
-	fmt.Println("#### Signer Options(use with `sign`")
+	fmt.Println("#### Signer Options(use with `sign`)")
 	fmt.Println("")
 	fmt.Println("Not implemented yet")
 }
@@ -101,6 +125,50 @@ func ServeI2P(s *server.NewsServer) error {
 	}
 	defer ln.Close()
 	return http.Serve(ln, s)
+}
+
+func isSamAround() bool {
+	ln, err := net.Listen("tcp", "127.0.0.1:7656")
+	if err != nil {
+		return true
+	}
+	ln.Close()
+	return false
+}
+
+func DefaultFeedURL() string {
+	if !isSamAround() {
+		return "http://tc73n4kivdroccekirco7rhgxdg5f3cjvbaapabupeyzrqwv5guq.b32.i2p/news.atom.xml"
+	}
+	garlic := &onramp.Garlic{}
+	defer garlic.Close()
+	ln, err := garlic.Listen()
+	if err != nil {
+		return "http://tc73n4kivdroccekirco7rhgxdg5f3cjvbaapabupeyzrqwv5guq.b32.i2p/news.atom.xml"
+	}
+	defer ln.Close()
+	return "http://" + ln.Addr().String() + "/news.atom.xml"
+}
+
+func Build(newsFile string) {
+	news := builder.Builder(newsFile, *releasejson, *bloclist)
+	news.TITLE = *title
+	news.SITEURL = *site
+	news.MAINFEED = *mainurl
+	news.BACKUPFEED = *backupurl
+	news.SUBTITLE = *subtitle
+	news.URNID = *urn
+	if feed, err := news.Build(); err != nil {
+		log.Printf("Build error: %s", err)
+	} else {
+		filename := strings.Replace(strings.Replace(strings.Replace(newsFile, ".html", ".atom.xml", -1), "entries", "news", -1), "translations", "", -1)
+		if err := os.MkdirAll(filepath.Join(*builddir, filepath.Dir(filename)), 0755); err != nil {
+			panic(err)
+		}
+		if err = ioutil.WriteFile(filepath.Join(*builddir, filename), []byte(feed), 0644); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func main() {
@@ -140,6 +208,28 @@ func main() {
 			i++
 		}
 	case "build":
+		f, e := os.Stat(*newsfile)
+		if e != nil {
+			panic(e)
+		}
+		if f.IsDir() {
+			err := filepath.Walk(*newsfile,
+				func(path string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+					ext := filepath.Ext(path)
+					if ext == ".html" {
+						Build(path)
+					}
+					return nil
+				})
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			Build(*newsfile)
+		}
 	case "sign":
 	case "help":
 		Help()

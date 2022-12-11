@@ -3,8 +3,11 @@ module i2pgit.org/idk/newsgo
 go 1.19
 
 require (
+	github.com/anaskhan96/soup v1.2.5
 	github.com/eyedeekay/onramp v0.0.0-20220829050101-64cb1842d0f0
+	github.com/google/uuid v1.3.0
 	github.com/wcharczuk/go-chart/v2 v2.1.0
+	github.com/yosssi/gohtml v0.0.0-20201013000340-ee4748c638f4
 	gitlab.com/golang-commonmark/markdown v0.0.0-20211110145824-bf3e522c626a
 )
 

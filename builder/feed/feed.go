@@ -1,45 +1,85 @@
 package newsfeed
 
 import (
-	"bytes"
-	"encoding/xml"
+	"fmt"
+	"io/ioutil"
+
+	"github.com/anaskhan96/soup"
 )
 
-type Node struct {
-	XMLName xml.Name
-	Attrs   []xml.Attr `xml:",any,attr"`
-	Content []byte     `xml:",innerxml"`
-	Nodes   []Node     `xml:",any"`
+type Feed struct {
+	HeaderTitle     string
+	ArticlesSet     []string
+	EntriesHTMLPath string
+	doc             soup.Root
 }
 
-func (n *Node) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	n.Attrs = start.Attr
-	type node Node
-
-	return d.DecodeElement((*node)(n), &start)
-}
-
-func XMLData(data []byte) (m []Node) {
-	buf := bytes.NewBuffer(data)
-	dec := xml.NewDecoder(buf)
-
-	var n Node
-	err := dec.Decode(&n)
+func (f *Feed) LoadHTML() error {
+	data, err := ioutil.ReadFile(f.EntriesHTMLPath)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("LoadHTML: error", err)
 	}
-
-	walk([]Node{n}, func(n Node) bool {
-		m = append(m, n)
-		return true
-	})
-	return m
+	f.doc = soup.HTMLParse(string(data))
+	f.HeaderTitle = f.doc.Find("header").FullText()
+	articles := f.doc.FindAll("article")
+	for _, article := range articles {
+		f.ArticlesSet = append(f.ArticlesSet, article.HTML())
+	}
+	return nil
 }
 
-func walk(nodes []Node, f func(Node) bool) {
-	for _, n := range nodes {
-		if f(n) {
-			walk(n.Nodes, f)
-		}
+func (f *Feed) Length() int {
+	return len(f.ArticlesSet)
+}
+
+func (f *Feed) Article(index int) *Article {
+	html := soup.HTMLParse(f.ArticlesSet[index])
+	articleData := html.Find("article").Attrs()
+	articleSummary := html.Find("details").Find("summary").FullText()
+	return &Article{
+		UID:           articleData["id"],
+		Title:         articleData["title"],
+		Link:          articleData["href"],
+		Author:        articleData["author"],
+		PublishedDate: articleData["published"],
+		UpdatedDate:   articleData["updated"],
+		Summary:       articleSummary,
+		content:       html.HTML(),
 	}
+}
+
+type Article struct {
+	UID           string
+	Title         string
+	Link          string
+	Author        string
+	PublishedDate string
+	UpdatedDate   string
+	Summary       string
+	// TODO: you have to collect this from the HTML itself and you have to take away the article and summary parts
+	content string
+}
+
+func (a *Article) Content() string {
+	str := ""
+	doc := soup.HTMLParse(string(a.content))
+	articleBody := doc.FindAll("")
+	for _, v := range articleBody[5:] {
+		str += v.HTML()
+	}
+	return str
+}
+
+func (a *Article) Entry() string {
+	return fmt.Sprintf(
+		"<entry>\n\t<id>%s</id>\n\t<title>%s</title>\n\t<updated>%s</updated>\n\t<author><name>%s</name></author>\n\t<link href=\"%s\" rel=\"alternate\"/>\n\t<published>%s</published>\n\t<summary>%s</summary>\n\t<content type=\"xhtml\">\n\t\t<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t%s\n\t\t</div>\n\t</content>\n</entry>",
+		a.UID,
+		a.Title,
+		a.UpdatedDate,
+		a.Author,
+		a.Link,
+		a.PublishedDate,
+		a.Summary,
+		a.Content(),
+	)
 }

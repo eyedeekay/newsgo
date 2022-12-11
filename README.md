@@ -18,7 +18,7 @@ Usage
 
 Use these options to configure the software
 
-#### Server Options(use with `serve`
+#### Server Options(use with `serve`)
 
  - `-newsdir`: directory to serve newsfeed from
  - `-statsfile`: file to store the stats in, in json format
@@ -26,10 +26,18 @@ Use these options to configure the software
  - `-port`: port to serve news files on
  - `-i2p`: serve news files directly to I2P using SAMv3
 
-#### Builder Options(use with `build`
+#### Builder Options(use with `build`)
 
-Not implemented yet
+ - `-newsfile`: entries to pass to news generator. If passed a directory, all `entries.html` files in the directory will be processed
+ - `-blockfile`: block list file to pass to news generator
+ - `-releasejson`: json file describing an update to pass to news generator
+ - `-feedtitle`: title to use for the RSS feed to pass to news generator
+ - `-feedsubtitle`: subtitle to use for the RSS feed to pass to news generator
+ - `-feedsite`: site for the RSS feed to pass to news generator
+ - `-feedmain`: Primary newsfeed for updates to pass to news generator
+ - `-feedbackup`: Backup newsfeed for updates to pass to news generator
+ - `-feeduri`: UUID to use for the RSS feed to pass to news generator
 
-#### Signer Options(use with `sign`
+#### Signer Options(use with `sign`)
 
 Not implemented yet
