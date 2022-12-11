@@ -99,7 +99,7 @@ func Help() {
 	fmt.Println("newsgo")
 	fmt.Println("======")
 	fmt.Println("")
-	fmt.Println("I2P News Server Tool/Library")
+	fmt.Println("I2P News Server Tool/Library. A whole lot faster than the python one. Otherwise compatible.")
 	fmt.Println("")
 	fmt.Println("Usage")
 	fmt.Println("-----")
